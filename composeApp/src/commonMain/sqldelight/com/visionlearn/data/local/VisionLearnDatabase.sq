@@ -1,0 +1,361 @@
+-- VisionLearn Database Schema
+-- Based on Perkins CVI Protocol Framework
+
+-- ============================================
+-- USER TABLE
+-- ============================================
+
+CREATE TABLE User (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT,
+    role TEXT NOT NULL DEFAULT 'parent',
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+);
+
+-- ============================================
+-- VISUAL PROFILE TABLE (Based on 16 CVI Visual Behaviors)
+-- ============================================
+
+CREATE TABLE VisualProfile (
+    id TEXT PRIMARY KEY NOT NULL,
+    userId TEXT NOT NULL,
+    childName TEXT NOT NULL,
+    childAge INTEGER,
+    cviPhase TEXT NOT NULL DEFAULT 'PHASE_II',
+    
+    -- 16 Visual Behaviors (1-5 scale)
+    visualAttention INTEGER DEFAULT 3,
+    visualRecognition INTEGER DEFAULT 3,
+    visualCuriosity INTEGER DEFAULT 3,
+    objectComplexity INTEGER DEFAULT 3,
+    arrayComplexity INTEGER DEFAULT 3,
+    sensoryComplexity INTEGER DEFAULT 3,
+    lightPreference TEXT DEFAULT 'NEUTRAL',
+    preferredColors TEXT DEFAULT '["yellow"]',
+    movementNeed INTEGER DEFAULT 3,
+    visualLatency TEXT DEFAULT 'MILD',
+    visualFieldPreference TEXT DEFAULT 'CENTER',
+    distanceViewing INTEGER DEFAULT 3,
+    visualMotorIntegration INTEGER DEFAULT 3,
+    visualReflexes TEXT DEFAULT 'TYPICAL',
+    noveltyTolerance INTEGER DEFAULT 3,
+    faceRecognition INTEGER DEFAULT 3,
+    
+    -- Session Preferences
+    sessionDurationMinutes INTEGER DEFAULT 15,
+    inputMethod TEXT DEFAULT 'TOUCH',
+    audioFeedbackEnabled INTEGER DEFAULT 1,
+    hapticFeedbackEnabled INTEGER DEFAULT 1,
+    ttsRate REAL DEFAULT 1.0,
+    isActive INTEGER DEFAULT 0,
+    
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL,
+    
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+);
+
+-- ============================================
+-- LEARNING MODULE TABLE
+-- ============================================
+
+CREATE TABLE LearningModule (
+    id TEXT PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    type TEXT NOT NULL,
+    difficulty INTEGER DEFAULT 1,
+    minCVIPhase TEXT DEFAULT 'PHASE_I',
+    createdBy TEXT,
+    isTemplate INTEGER DEFAULT 0,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+);
+
+-- ============================================
+-- ACTIVITY TABLE
+-- ============================================
+
+CREATE TABLE Activity (
+    id TEXT PRIMARY KEY NOT NULL,
+    moduleId TEXT NOT NULL,
+    title TEXT NOT NULL,
+    instructions TEXT,
+    contentJson TEXT NOT NULL,
+    orderIndex INTEGER NOT NULL DEFAULT 0,
+    createdAt INTEGER NOT NULL,
+    FOREIGN KEY (moduleId) REFERENCES LearningModule(id) ON DELETE CASCADE
+);
+
+-- ============================================
+-- MEDIA ASSET TABLE
+-- ============================================
+
+CREATE TABLE MediaAsset (
+    id TEXT PRIMARY KEY NOT NULL,
+    activityId TEXT,
+    userId TEXT NOT NULL,
+    filePath TEXT NOT NULL,
+    type TEXT NOT NULL,
+    aiDescription TEXT,
+    altText TEXT,
+    createdAt INTEGER NOT NULL,
+    FOREIGN KEY (activityId) REFERENCES Activity(id) ON DELETE SET NULL
+);
+
+-- ============================================
+-- SESSION TABLE
+-- ============================================
+
+CREATE TABLE Session (
+    id TEXT PRIMARY KEY NOT NULL,
+    profileId TEXT NOT NULL,
+    moduleType TEXT,
+    startedAt INTEGER NOT NULL,
+    endedAt INTEGER,
+    totalActivities INTEGER DEFAULT 0,
+    completedActivities INTEGER DEFAULT 0,
+    correctAnswers INTEGER DEFAULT 0,
+    averageResponseTimeMs INTEGER,
+    notes TEXT,
+    FOREIGN KEY (profileId) REFERENCES VisualProfile(id) ON DELETE CASCADE
+);
+
+-- ============================================
+-- PROGRESS RECORD TABLE
+-- ============================================
+
+CREATE TABLE ProgressRecord (
+    id TEXT PRIMARY KEY NOT NULL,
+    sessionId TEXT NOT NULL,
+    profileId TEXT NOT NULL,
+    activityId TEXT NOT NULL,
+    activityType TEXT,
+    startedAt INTEGER NOT NULL,
+    completedAt INTEGER,
+    responseTimeMs INTEGER,
+    isCorrect INTEGER,
+    score REAL,
+    attempts INTEGER DEFAULT 1,
+    FOREIGN KEY (sessionId) REFERENCES Session(id) ON DELETE CASCADE,
+    FOREIGN KEY (profileId) REFERENCES VisualProfile(id)
+);
+
+-- ============================================
+-- INDEXES
+-- ============================================
+
+CREATE INDEX idx_profile_userId ON VisualProfile(userId);
+CREATE INDEX idx_profile_isActive ON VisualProfile(isActive);
+CREATE INDEX idx_session_profileId ON Session(profileId);
+CREATE INDEX idx_progress_sessionId ON ProgressRecord(sessionId);
+CREATE INDEX idx_progress_profileId ON ProgressRecord(profileId);
+CREATE INDEX idx_activity_moduleId ON Activity(moduleId);
+
+
+-- ============================================
+-- USER QUERIES
+-- ============================================
+
+insertUser:
+INSERT INTO User (id, name, email, role, createdAt, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?);
+
+getUserById:
+SELECT * FROM User WHERE id = ?;
+
+getAllUsers:
+SELECT * FROM User ORDER BY name ASC;
+
+updateUser:
+UPDATE User SET name = ?, email = ?, role = ?, updatedAt = ? WHERE id = ?;
+
+deleteUser:
+DELETE FROM User WHERE id = ?;
+
+-- ============================================
+-- VISUAL PROFILE QUERIES
+-- ============================================
+
+insertProfile:
+INSERT INTO VisualProfile (
+    id, userId, childName, childAge, cviPhase,
+    visualAttention, visualRecognition, visualCuriosity,
+    objectComplexity, arrayComplexity, sensoryComplexity,
+    lightPreference, preferredColors, movementNeed,
+    visualLatency, visualFieldPreference, distanceViewing,
+    visualMotorIntegration, visualReflexes, noveltyTolerance, faceRecognition,
+    sessionDurationMinutes, inputMethod, audioFeedbackEnabled, hapticFeedbackEnabled,
+    ttsRate, isActive, createdAt, updatedAt
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getProfileById:
+SELECT * FROM VisualProfile WHERE id = ?;
+
+getProfilesByUser:
+SELECT * FROM VisualProfile WHERE userId = ? ORDER BY updatedAt DESC;
+
+getFirstProfile:
+SELECT * FROM VisualProfile ORDER BY createdAt ASC LIMIT 1;
+
+getAllProfiles:
+SELECT * FROM VisualProfile ORDER BY childName ASC;
+
+getActiveProfile:
+SELECT * FROM VisualProfile WHERE isActive = 1 LIMIT 1;
+
+setActiveProfile:
+UPDATE VisualProfile SET isActive = CASE WHEN id = ? THEN 1 ELSE 0 END;
+
+updateProfile:
+UPDATE VisualProfile SET
+    childName = ?, childAge = ?, cviPhase = ?,
+    visualAttention = ?, visualRecognition = ?, visualCuriosity = ?,
+    objectComplexity = ?, arrayComplexity = ?, sensoryComplexity = ?,
+    lightPreference = ?, preferredColors = ?, movementNeed = ?,
+    visualLatency = ?, visualFieldPreference = ?, distanceViewing = ?,
+    visualMotorIntegration = ?, visualReflexes = ?, noveltyTolerance = ?, faceRecognition = ?,
+    sessionDurationMinutes = ?, inputMethod = ?, audioFeedbackEnabled = ?, hapticFeedbackEnabled = ?,
+    ttsRate = ?, updatedAt = ?
+WHERE id = ?;
+
+deleteProfile:
+DELETE FROM VisualProfile WHERE id = ?;
+
+-- ============================================
+-- SESSION QUERIES
+-- ============================================
+
+insertSession:
+INSERT INTO Session (id, profileId, moduleType, startedAt, endedAt, totalActivities, completedActivities, correctAnswers, averageResponseTimeMs, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getSessionById:
+SELECT * FROM Session WHERE id = ?;
+
+getSessionsByProfile:
+SELECT * FROM Session WHERE profileId = ? ORDER BY startedAt DESC;
+
+getRecentSessions:
+SELECT * FROM Session WHERE profileId = ? ORDER BY startedAt DESC LIMIT ?;
+
+updateSession:
+UPDATE Session SET endedAt = ?, totalActivities = ?, completedActivities = ?, correctAnswers = ?, averageResponseTimeMs = ?, notes = ?
+WHERE id = ?;
+
+deleteSession:
+DELETE FROM Session WHERE id = ?;
+
+-- ============================================
+-- PROGRESS RECORD QUERIES
+-- ============================================
+
+insertProgress:
+INSERT INTO ProgressRecord (id, sessionId, profileId, activityId, activityType, startedAt, completedAt, responseTimeMs, isCorrect, score, attempts)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getProgressBySession:
+SELECT * FROM ProgressRecord WHERE sessionId = ? ORDER BY startedAt ASC;
+
+getProgressByProfile:
+SELECT * FROM ProgressRecord WHERE profileId = ? ORDER BY startedAt DESC;
+
+getRecentProgress:
+SELECT * FROM ProgressRecord WHERE profileId = ? ORDER BY startedAt DESC LIMIT ?;
+
+getTotalCorrectByProfile:
+SELECT COUNT(*) FROM ProgressRecord WHERE profileId = ? AND isCorrect = 1;
+
+getTotalAttemptsByProfile:
+SELECT COUNT(*) FROM ProgressRecord WHERE profileId = ?;
+
+-- ============================================
+-- LEARNING MODULE QUERIES
+-- ============================================
+
+insertModule:
+INSERT INTO LearningModule (id, title, description, type, difficulty, minCVIPhase, createdBy, isTemplate, createdAt, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getModuleById:
+SELECT * FROM LearningModule WHERE id = ?;
+
+getModulesByType:
+SELECT * FROM LearningModule WHERE type = ? ORDER BY difficulty ASC;
+
+getAllModules:
+SELECT * FROM LearningModule ORDER BY title ASC;
+
+-- ============================================
+-- ACTIVITY QUERIES
+-- ============================================
+
+insertActivity:
+INSERT INTO Activity (id, moduleId, title, instructions, contentJson, orderIndex, createdAt)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+getActivitiesByModule:
+SELECT * FROM Activity WHERE moduleId = ? ORDER BY orderIndex ASC;
+
+getActivityById:
+SELECT * FROM Activity WHERE id = ?;
+
+-- ============================================
+-- MEDIA ASSET QUERIES
+-- ============================================
+
+insertMediaAsset:
+INSERT INTO MediaAsset (id, activityId, userId, filePath, type, aiDescription, altText, createdAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+getMediaByActivity:
+SELECT * FROM MediaAsset WHERE activityId = ?;
+
+getMediaByUser:
+SELECT * FROM MediaAsset WHERE userId = ? ORDER BY createdAt DESC;
+
+-- ============================================
+-- CUSTOM ACTIVITY TABLE (User-created content)
+-- ============================================
+
+CREATE TABLE CustomActivity (
+    id TEXT PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    moduleType TEXT NOT NULL,
+    imagesJson TEXT NOT NULL,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL,
+    isFromTemplate INTEGER DEFAULT 0,
+    templateId TEXT
+);
+
+CREATE INDEX idx_custom_activity_type ON CustomActivity(moduleType);
+CREATE INDEX idx_custom_activity_created ON CustomActivity(createdAt DESC);
+
+-- ============================================
+-- CUSTOM ACTIVITY QUERIES
+-- ============================================
+
+insertCustomActivity:
+INSERT INTO CustomActivity (id, title, moduleType, imagesJson, createdAt, updatedAt, isFromTemplate, templateId)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+getAllCustomActivities:
+SELECT * FROM CustomActivity ORDER BY createdAt DESC;
+
+getCustomActivityById:
+SELECT * FROM CustomActivity WHERE id = ?;
+
+getCustomActivitiesByType:
+SELECT * FROM CustomActivity WHERE moduleType = ? ORDER BY createdAt DESC;
+
+updateCustomActivity:
+UPDATE CustomActivity SET title = ?, imagesJson = ?, updatedAt = ? WHERE id = ?;
+
+deleteCustomActivity:
+DELETE FROM CustomActivity WHERE id = ?;
+
+getCustomActivityCount:
+SELECT COUNT(*) FROM CustomActivity;
