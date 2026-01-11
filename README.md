@@ -1,4 +1,4 @@
-# VisionLearn 👁️
+# VisionLearn
 
 > Accessible learning for children with Cortical Visual Impairment (CVI)
 
@@ -41,20 +41,20 @@ Existing apps don't address these specific needs, forcing educators to manually 
 
 ## Features
 
-### 🎨 Visual Profile System
+### Visual Profile System
 - Based on the **Perkins 16 Visual Behaviors** framework
 - Customizable CVI phase selection (Phase I, II, III)
 - Personalized color preferences (yellow, red, pink, blue, green, orange)
 - Adjustable complexity and timing settings
 
-### 📚 Five Learning Modules
+### Five Learning Modules
 1. **Image Recognition** - Identify objects with audio feedback and encouragement
 2. **Cause & Effect** - Touch-response activities for engagement and learning
 3. **Sorting** - Group objects by category with visual feedback
 4. **Matching** - Find matching pairs with progressive difficulty
 5. **Sequencing** - Arrange items in order (numbers, patterns, sizes)
 
-### ♿ Accessibility First
+### Accessibility First
 - Large touch targets (minimum 64dp)
 - High contrast CVI-friendly color options
 - Screen reader support (TalkBack/VoiceOver)
@@ -63,19 +63,19 @@ Existing apps don't address these specific needs, forcing educators to manually 
 - Configurable response timeouts
 - Simple, uncluttered visual design
 
-### 🤖 AI-Powered Learning (Google Gemini)
+### AI-Powered Learning (Google Gemini)
 - Dynamic question generation tailored to CVI needs
 - Adaptive difficulty based on performance
 - Personalized encouragement messages
 - Fallback to local content when offline
 
-### 🎨 Custom Activity Creator
+### Custom Activity Creator
 - Create personalized activities with your own images
 - Take photos or select from gallery
 - Configure question text and correct answers
 - Share activities across sessions
 
-### 📊 Progress Tracking
+### Progress Tracking
 - Session history and statistics
 - Accuracy tracking per module
 - Total activities completed
@@ -119,36 +119,7 @@ Existing apps don't address these specific needs, forcing educators to manually 
 
 ## Demo Video
 
-<!-- 
-🎬 VIDEO INSTRUCTIONS FOR KOTLINCONF CONTEST:
-
-Create a short screencast (2-3 minutes) demonstrating the main features:
-
-1. **Setup**: Use a screen recorder (Android Studio, QuickTime, or OBS)
-2. **Content to show**:
-   - App launch and splash screen
-   - Onboarding flow (name, phase selection, color preferences)
-   - Home screen overview
-   - Each learning module in action:
-     * Recognition - show question, answer selection, feedback
-     * Cause & Effect - show touch interaction
-     * Sorting - show category selection
-     * Matching - show pair matching
-     * Sequencing - show ordering
-   - Progress tracking screen
-   - Custom activity creator
-   - (Optional) Show iOS version briefly
-
-3. **Tips**:
-   - Keep it under 3 minutes
-   - Add background music or voiceover explaining features
-   - Show the accessibility features (high contrast, large buttons)
-   - Demonstrate AI-generated content
-
-4. **Upload**: Upload to YouTube/Vimeo/Google Drive and update link below
--->
-
-[▶️ Watch Demo Video](https://youtube.com/shorts/vWTn9NrPOhU)
+[Watch Demo Video](https://youtube.com/shorts/ItFs8iionHk?feature=share)
 
 ## Technical Implementation
 
@@ -211,7 +182,7 @@ kdoctor
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/AarulAgarwal/VisionLearn.git
+git clone https://github.com/arulagarwal/VisionLearn.git
 cd VisionLearn
 ```
 
@@ -315,7 +286,7 @@ This app is designed around the **Perkins CVI Protocol**, a comprehensive educat
 5. Array Complexity
 6. Sensory Complexity
 7. Light Preference
-8. **Color Preference** ✓
+8. Color Preference
 9. Movement Need
 10. Visual Latency
 11. Visual Field Preference
@@ -352,5 +323,3 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ---
 
 Created for the **KotlinConf 2026 Kotlin Multiplatform Contest**
-
-Made with ❤️ for children with CVI
