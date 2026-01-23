@@ -1,6 +1,6 @@
 # VisionLearn
 
-> Accessible learning for children with Cortical Visual Impairment (CVI)
+> Accessible learning for children with Cerebral Visual Impairment (CVI)
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-purple.svg)](https://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.7.3-blue.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
